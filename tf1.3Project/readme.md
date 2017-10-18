@@ -1,4 +1,4 @@
-# 2 trainable parameter
+# 0.2TrainableParameters.py
 using loss function to measures how far apart the current model is from the provided data.
 least square is the common way to train linear model
  square of (model output - expected value provided data)  let the sum minimum
@@ -16,6 +16,7 @@ print(optimizer,train)#(<tensorflow.python.training.gradient_descent.GradientDes
 
 
 # 1 getting_start.py
+# 0.1letTensorFlow.py
 the core unit of tensorflow is tensor. A tensor consist of a set of primitive values shaped into an array of any number of dimensions.
 
 we can regard the neunal network as a computational graph.
@@ -23,7 +24,7 @@ it is the series of tersorflow operations arranged into graph of nodes.
 [arrange: Put (things) in a neat, attractive, or required order.]
 Each node takes zero or more tensors as inputs and produces a tensor as an output.
 
-type of node: depent on what type the input and output tensors are
+type of node: depent on what type the input and output tensors are.
 constant: takes no inputs and outputs a value it stores in internally.
 operation: such add several nodes, implemented by + or tf.add()
 placeholers: accept external input
