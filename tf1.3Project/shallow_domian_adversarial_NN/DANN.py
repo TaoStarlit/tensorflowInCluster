@@ -2,6 +2,8 @@
 NameError: global name 'W' is not defined
 W is define in __init__
 but if you invoke in another member function, it can not find it
+
+@ share variables between methods via self.
 """
 
 import tensorflow as tf
@@ -90,3 +92,6 @@ class DANN(object): #derived class DANN inherit the base class object
     def evaluate(self,x_test,y_test):
         print("W,b after train:", self.sess.run([self.W, self.b]))
         print('loss:', self.sess.run(self.loss, {self.x: x_test, self.y: y_test}))
+
+
+
