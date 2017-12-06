@@ -1,3 +1,80 @@
+#20171206
+# 1.2 tf.estimator.py
+tf.estimator is a high-level TensorFlow library that simplifies the mechanics of machine learning, including the following:
+running training loops
+running evaluation loops
+managing data sets
+tf.estimator defines many common models.
+
+predefined types of training / evaluation like linear regression / linear classification / NN classisfer and regressors
+and predefined the type parameters,  like a kind of linear regression feature_column
+
+we build a regresion model by estimator:
+feature_columns = [tf.feature_column.numeric_column("x", shape=[1])]
+estimator = tf.estimator.LinearRegressor(feature_columns=feature_columns) # the feature_column shape is [1]
+print("train metrics: %r"% train_metrics) #train metrics: {'loss': 1.4188086e-07, 'global_step': 1000, 'average_loss': 3.5470215e-08}
+print("eval metrics: %r"% eval_metrics) #eval metrics: {'loss': 0.010155011, 'global_step': 1000, 'average_loss': 0.0025387527}
+so the trained parameter, may be one W and one b
+
+# 1.3 customer_model.py
+redefine the estimator,  overwrite the function member, by the low-level tensorflow API, just like 1.1
+estimator = tf.estimator.Estimator(model_fn=model_fn)    mode_fn is redefine by us
+
+
+
+# 2.1 MnistBeginner.py
+contrast it with the previous linear regression:
+1 shape of data, and the operation   ??*1 vs ??*784 ;  linear一元一次 vs 降维的线性映射  
+    x = tf.placeholder(tf.float32) # default is None
+    linear_model = W * x + b
+VS
+    x = tf.placeholder(tf.float32, [None, 784]) # also there is a none, so the second number is the nunber of columns the 784 is the number of pixels
+    W = tf.Variable(tf.zeros([784, 10])) # matrix multiple and add, here map ?? * 784 to ?? * 10, so the matrix shape is 784*10
+    b = tf.Variable(tf.zeros([10]))
+    y = tf.matmul(x, W) + b
+2 optimization and  loss function ==> train: least squares vs softmax_cross_entroy_with_logits   optimizer is the same: GradientDescentOpimizer
+    loss = tf.reduce_sum(tf.square(linear_model - y)) # sum of the squares
+    optimizer = tf.train.GradientDescentOptimizer(0.01)
+    train = optimizer.minimize(loss)
+VS
+    cross_entropy = tf.reduce_mean(
+        tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
+    train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+
+3 session and initializer :    Seession vs InteractiveSession;    global_variables_initilalizer is the same
+    init = tf.global_variables_initializer()
+    sess = tf.Session()
+    sess.run(init)
+VS
+    sess = tf.InteractiveSession()
+    tf.global_variables_initializer().run()
+
+4 test the trained model (evaluate the accuracy)      original loss function of original train_set  vs  mean cast equal(argmax output, argmax label)
+    curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x: x_train, y: y_train})
+VS
+    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    print(sess.run(accuracy, feed_dict={x: mnist.test.images,
+                                        y_: mnist.test.labels}))
+
+doc:  API    
+    argmax: Returns the index with the largest value across axes of a tensor.  because y is last layer, we should find the index(class result)  
+        tensor = y , axis = 1 Describes which axis of the input Tensor to reduce across. For vectors, use axis = 0. Here matrix, the 2nd dim
+    equal: Returns the truth value of (x == y) element-wise.  vector with element 1 and 0;
+    cast: Casts a tensor to a new type.  from bool to float32
+    reduce_mean: Computes the mean of elements across dimensions of a tensor. Reduces input_tensor along the dimensions given in axis.
+        If axis has no entries, all dimensions are reduced, and a tensor with a single element is returned.
+            x = tf.constant([[1., 1.], [2., 2.]])  这个轴可能是从高维算起，如 这里现有列数，再有行数，所以 行算高的，然后降低行的个数，这个就是竖的啦
+            tf.reduce_mean(x)  # 1.5
+            tf.reduce_mean(x, 0)  # [1.5, 1.5]
+            tf.reduce_mean(x, 1)  # [1.,  2.]
+
+
+
+
+
+#before 201712
+
 # shadow_domain_adversarial_NN
 1. test tensorflow NN via NNclassifer.py
 1. copy NNclassifer into DANN class
@@ -23,6 +100,7 @@ The simplest optimizer is gradient descent. It modifies each variable according 
 optimizer = tf.train.GradientDescentOptimizer(0.025)#bigger, and the train will be quicker !! but if bigger than 0.025 it can not converge
 train = optimizer.minimize(loss)<br>
 print(optimizer,train)#(<tensorflow.python.training.gradient_descent.GradientDescentOptimizer object at 0x2b9cb35cc9d0>, <tf.Operation 'GradientDescent' type=NoOp>)
+
 
 
 
