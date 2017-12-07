@@ -70,6 +70,39 @@ doc:  API
             tf.reduce_mean(x, 1)  # [1.,  2.]
 
 
+# 2.2 MnistExpert
+in 2.1 we use softmax to classify the digits, now we implement A deep MNIST classifier using convolutional layers.
+review: 
+    input: (N_examples, 784)    each example is a column, and the number of rows is the number of examples
+python keyword
+    with:   it seems like the duration/scope of an operation 
+
+loss function: the same with MnistBeginner
+    tensorflow function:
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=y_,logits=y_conv)
+    softmax_cross_entropy_with_logits:  Computes softmax cross entropy between logits and labels.
+        labels: Each row labels[i] must be a valid probability distribution.  ??
+            Ans: y_ = tf.placeholder(tf.float32, [None, 10])  这里每一行都是1个1，九个0，所以 P(1)=0.1 P(0)=0.9
+        logits: Unscaled log probabilities.
+optimizer:   adamOptimizer
+    train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+
+graph_location:
+  graph_location = tempfile.mkdtemp()
+  print('Saving graph to: %s' % graph_location)
+  train_writer = tf.summary.FileWriter(graph_location)
+  train_writer.add_graph(tf.get_default_graph())
+
+Train and Evaluate the Model
+How well does this model do? To train and evaluate it we will use code that is nearly identical to that for the simple one layer SoftMax network above.
+The differences are that:
+    We will replace the steepest gradient descent optimizer with the more sophisticated ADAM optimizer.
+    We will include the additional parameter keep_prob in feed_dict to control the dropout rate.
+    We will add logging to every 100th iteration in the training process.
+    We will also use tf.Session rather than tf.InteractiveSession. This better separates the process of creating the graph (model specification) and the process of evaluating the graph (model fitting). It generally makes for cleaner code. 
+
+
+
 
 
 
