@@ -1,4 +1,32 @@
-#20171206
+# 20171207
+# 3.1tensorFlow_Mechanics/fully_connect_feed.py
+The goal of this tutorial is to show how to use TensorFlow to train and evaluate a simple feed-forward neural network for handwritten digit classification using the (classic) MNIST data set. 
+The intended audience for this tutorial is experienced machine learning users interested in using TensorFlow.
+
+99\ parser and add the argument in python 
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+      '--learning_rate',
+      type=float,
+      default=0.01,
+      help='Initial learning rate.'
+  )
+  parser.add_argument(...)
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 20171206
 # 1.2 tf.estimator.py
 tf.estimator is a high-level TensorFlow library that simplifies the mechanics of machine learning, including the following:
 running training loops
