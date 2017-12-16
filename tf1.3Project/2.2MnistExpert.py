@@ -146,14 +146,15 @@ def main(_):
     correct_prediction = tf.cast(correct_prediction, tf.float32)
   accuracy = tf.reduce_mean(correct_prediction)
 
-  graph_location = tempfile.mkdtemp()
+  #graph_location = tempfile.mkdtemp()#Saving graph to: C:\Users\zheng\AppData\Local\Temp\tmphap3mpy_
+  graph_location = 'D:/tmp/2.2MnistExpert/'
   print('Saving graph to: %s' % graph_location)
   train_writer = tf.summary.FileWriter(graph_location)
   train_writer.add_graph(tf.get_default_graph())
 
   with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    for i in range(1200): #20000
+    for i in range(800): #20000 1200 500
       batch = mnist.train.next_batch(50)
       if i % 100 == 0:
         train_accuracy = accuracy.eval(feed_dict={

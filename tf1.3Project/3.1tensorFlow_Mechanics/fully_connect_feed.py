@@ -217,8 +217,10 @@ def run_training():
 
 def main(_):
   if tf.gfile.Exists(FLAGS.log_dir):
+    print(FLAGS.log_dir,"Exists"); # why /tmp\tensorflow/mnist/logs/fully_connected_feed   Exists
     tf.gfile.DeleteRecursively(FLAGS.log_dir)
   tf.gfile.MakeDirs(FLAGS.log_dir)
+  print('make a new dir',FLAGS.log_dir);
   run_training()
 
 

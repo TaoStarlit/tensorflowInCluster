@@ -1,9 +1,107 @@
+# 20171215
+core model function is here, and the paper: 
+
+def create_conv_model(fingerprint_input, model_settings, is_training):
+  This is roughly the network labeled as 'cnn-trad-fpool3' in the
+  'Convolutional Neural Networks for Small-footprint Keyword Spotting' paper:
+  http://www.isca-speech.org/archive/interspeech_2015/papers/i15_1478.pdf
+
+  This produces fairly good quality results, but can involve a large number of
+  weight parameters and computations. For a cheaper alternative from the same
+  paper with slightly less accuracy, see 'low_latency_conv' below.
+
+review how convolution:  multiply, tranverse, add.  (f*g)(n)=sigma g(n-tau)f(tau)
+eg1. smooth the image. multiply:let the pixel be the average of the neast average, so the kernel is a 3x3 matrix, each element is 1/9; tranverse:this kernel slide to all imamge; add:construct a new image
+eg2. calculate the shapenee.  kernel=[-1 2 -2 2 -1], if is the near pixels is similar then it will tend to 0.
+we define the kernel to get the feature.
+here the kernel is the parameter to be train, it is use to "find" or "explore" the feature.
+
+
+# 20171213
+ImportError: No module named 'inputdata'
+inputdata is a key module to pre-process the speech dataset, to extract their features. Maybe is only a files in the same folder of train.py
+
+Ans: inputdata.py is the file in the same folder, it only contains 13 function, is not a class.
+
+so as model.py  the model is created by the function
+  logits, dropout_prob = models.create_model(     ---- the model is going to be used for training
+      fingerprint_input,
+      model_settings,
+      FLAGS.model_architecture,
+      is_training=True)
+and the setting and architecture are set by the arguments, the argument is set by
+      model_settings = models.prepare_model_settings(
+      len(input_data.prepare_words_list(FLAGS.wanted_words.split(','))),
+      FLAGS.sample_rate, FLAGS.clip_duration_ms, FLAGS.window_size_ms,
+      FLAGS.window_stride_ms, FLAGS.dct_coefficient_count)
+look at the default arguments:
+    sample_rate: 16000
+    wanted_words:'yes,no,up,down,left,right,on,off,stop,go'
+    clip_duration_ms: 1000   'Expected duration in milliseconds of the wavs'
+    window_size_ms:  30.0  'How long each spectrogram timeslice is'
+    window_stride_ms: 10.0  'How long each spectrogram timeslice is'
+    dct_coefficient_count: 40      'How many bins to use for the MFCC fingerprint'
+
+    model_architecture: conv
+
+
+
+# 20171211
+another how does the CNNs work for Small-footprint Keyword Spotting
+1\tradition Keyword Spotting Task
+more detail: G.Chen  Small-footprint Keyword Spotting using Deep Neural Networks.
+3 Modules: 1)Feature extraction, 2)DNN, 3)Posterior Handling
+    1)performs voice-activity detection and generates a vector of features every frame (10ms, voice sample rate 8K at least, so no more the 1.25ms) -- tip: think deeply and then know how to dropout the data(one subword is at least 100ms, so feature frame 10ms is fine)  -- look at the code
+    2)These features are stacked using the left to right context to create a larger vecter, the is fed to DNN
+    3)predict posterior probabilities
+
+
+
+speech_command: 
+save the dataset      /tmp/speech_dataset/
+Directory to write event logs and checkpoint '/tmp/speech_commands_train'
+'--summaries_dir', '/tmp/retrain_logs'  'Where to save summary logs for TensorBoard.'
+Problem:
+cd /tmp/speech_commands_train
+bash: cd: /tmp/speech_commands_train
+because it is tmp, so I can't find it again.   besides, you can not use ~/   but /home/tonzheng
+
+?? how to copy the relog file to my computer , because the firefox can see the graph
+
+Read, Extract and feed:
+  audio_processor = input_data.AudioProcessor(
+      FLAGS.data_url, FLAGS.data_dir, FLAGS.silence_percentage,
+      FLAGS.unknown_percentage,
+      FLAGS.wanted_words.split(','), FLAGS.validation_percentage,
+      FLAGS.testing_percentage, model_settings)
+
+    # Pull the audio samples we'll use for training.
+    train_fingerprints, train_ground_truth = audio_processor.get_data(
+        FLAGS.batch_size, 0, model_settings, FLAGS.background_frequency,
+        FLAGS.background_volume, time_shift_samples, 'training', sess)
+    # Run the graph with this batch of training data.
+    train_summary, train_accuracy, cross_entropy_value, _, _ = sess.run(
+        [
+            merged_summaries, evaluation_step, cross_entropy_mean, train_step,
+            increment_global_step
+        ],
+        feed_dict={
+            fingerprint_input: train_fingerprints,
+            ground_truth_input: train_ground_truth,
+            learning_rate_input: learning_rate_value,
+            dropout_prob: 0.5
+        })
+
+
+
+
+
 # 20171207
 # 3.1tensorFlow_Mechanics/fully_connect_feed.py
 The goal of this tutorial is to show how to use TensorFlow to train and evaluate a simple feed-forward neural network for handwritten digit classification using the (classic) MNIST data set. 
 The intended audience for this tutorial is experienced machine learning users interested in using TensorFlow.
 
-99\ parser and add the argument in python 
+99\1 parser and add the argument in python 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument(
@@ -14,13 +112,40 @@ if __name__ == '__main__':
   )
   parser.add_argument(...)
 
+20171208 continue
 
+99\2 gfile, save or delete but how to reuse?
+def main(_):
+  if tf.gfile.Exists(FLAGS.log_dir):
+    tf.gfile.DeleteRecursively(FLAGS.log_dir)
+  tf.gfile.MakeDirs(FLAGS.log_dir)
+  run_training()
+ANS:  
+1) module: tf.gfile   Import router for file_io.
+2) parser: Command line option and argument parsing was added to python 2.7
+becase when:
+  parser.add_argument(
+      '--log_dir',
+      type=str,
+      default=os.path.join(os.getenv('TEST_TMPDIR', '/tmp'),
+                           'tensorflow/mnist/logs/fully_connected_feed'),
+      help='Directory to put the log data.'
+  )
+so when i run (py35) python fully_connect_feed.py --log_dir ./herelog             
+then:
+it will make a new dir ./herelog
+#here FLAGS is a special 'global' variable  -- learn again，saving the auguments
 
+  data_sets = input_data.read_data_sets(FLAGS.input_data_dir, FLAGS.fake_data)
+if the files have existed ,then just extract,
+otherwise, must download first, and then extract
+experiment:
+python fully_connect_feed.py --log_dir ./herelog --input_data_dir ./hereinput
+./herelog Exists
+make a new dir ./herelog
+Successfully downloaded train-images-idx3-ubyte.gz 9912422 bytes.
 
-
-
-
-
+#save the parameter,  look at the train.py in tensorflow/example/speech_command
 
 
 
