@@ -1,0 +1,36 @@
+sparse_softmax_cross_entroy
+
+sunny is doing:
+sparse  and  one shot,  is there some difference?
+
+why sparse to dense.
+
+11, 9, 8, 11, 3,2
+
+	tf.tensorarray
+	tensorflow data type
+
+https://www.kaggle.com/c/tensorflow-speech-recognition-challenge/data
+on the cluster
+
+https://github.com/carpedm20/DCGAN-tensorflow/blob/master/model.py
+reuse the parameters   183 row	
+507 row
+
+in my cluster: 
+[tonzheng@vulcan6 ~]$ python
+Python 2.7.13 |Anaconda, Inc.| (default, Sep 30 2017, 18:12:43) 
+[GCC 7.2.0] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import tensorflow as tf
+>>> ckpt = tf.train.get_checkpoint_state('/home/tonzheng/S/')
+>>> 
+
+
+format: input output files   train.py
+	
+
+
+accuracy: model.py and the input_data.py
+
+platform: 
