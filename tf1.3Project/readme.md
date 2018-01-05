@@ -1,3 +1,24 @@
+# most important !!
+in the last layer, don't use relu activated function, because there is the softmax
+VGG7, 98% easyly
+VGG11, 96%, even after 5 time max_pool, the conv8 output is 1*1*128
+
+VGG11, keep all(no drop out)
+step 0, training accuracy 0.12
+test accuracy 0.0513
+step 100, training accuracy 0.48
+step 200, training accuracy 0.8
+test accuracy 0.8553
+step 300, training accuracy 0.8
+step 400, training accuracy 0.9
+test accuracy 0.9128
+step 500, training accuracy 0.94
+step 600, training accuracy 0.9
+test accuracy 0.9314
+step 700, training accuracy 0.94
+test accuracy 0.9303
+
+
 # 20171215
 core model function is here, and the paper: 
 
@@ -12,7 +33,8 @@ def create_conv_model(fingerprint_input, model_settings, is_training):
 
 review how convolution:  multiply, tranverse, add.  (f*g)(n)=sigma g(n-tau)f(tau)
 eg1. smooth the image. multiply:let the pixel be the average of the neast average, so the kernel is a 3x3 matrix, each element is 1/9; tranverse:this kernel slide to all imamge; add:construct a new image
-eg2. calculate the shapenee.  kernel=[-1 2 -2 2 -1], if is the near pixels is similar then it will tend to 0.
+eg2. calculate the shapenee.  kernel=[-1 2 -2 2 -1], if is the near pixels is 
+similar then it will tend to 0.
 we define the kernel to get the feature.
 here the kernel is the parameter to be train, it is use to "find" or "explore" the feature.
 
