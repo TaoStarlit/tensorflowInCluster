@@ -1,5 +1,6 @@
 1. visualize learning
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
     finished: in windows, we can visualize it, even the inputdata mudual, has the tensors to visualize;
 
@@ -41,6 +42,22 @@ the savepara_file get a suffix of -i
 1. save and check the input file, don't download every time
 
     reference: train.py download from url
+=======
+
+    finished: in windows, we can visualize it, even the inputdata mudual, has the tensors to visualize;
+
+1. save the trained parameter
+
+    reference: the train.py has save the parameter, and the freeze.py load the model and parameters;
+
+1. save and check the input file, don't download every time
+
+    reference: train.py download from url
+
+ 1. cvs file
+
+
+>>>>>>> Stashed changes
 =======
 
     finished: in windows, we can visualize it, even the inputdata mudual, has the tensors to visualize;
