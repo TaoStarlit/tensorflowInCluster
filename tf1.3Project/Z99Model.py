@@ -23,6 +23,159 @@ def half_ceil(a):
   b=a/2.0
   return int(math.ceil(b))
 
+# !! although no full connected networks, before softmax, we must have at least 512 features
+# according to https://alexisbcook.github.io/2017/global-average-pooling-layers-for-object-localization/
+# 7*7*2048 --> gloabal-average-pooling --> 1*1*2048 ---> Dense(not actually full contect) --> 10 classs
+
+# origin VGG11 image is 224*244 5 max_pool  228 -> 112 -> 56 -> 128 ->14 ->7
+# here is 28, so I can only max_pool 2 times  28 -> 14  -> 7  512 channel
+# when using globle_average_pool  I use 3 times  - > 4
+#def VGG5GAP(x,h=28,w=28,para={1:16,2:32, 3:64, 4:128, 5:10}):
+def VGG5GAP(x, h=28, w=28, para={1: 32, 2: 64, 3: 128, 4: 256, 5: 512, 6:10}):
+  """VGG11 builds the graph for a VGG11 net for classifying 2D fingerprint.
+  Args:
+    para: an input parameter for the number of weights in each layers
+    para={1:8, 2:16, 3:32,4:32, 5:64,6:64, 7:128,8:128, 9:512,10:512:11:10}
+  Returns:
+    placeholder name, and output logits
+  """
+  with tf.name_scope('conv1'):
+    W_conv1 = weight_variable([3, 3, 1, para[1]]) # the defintion can be in the latter
+    b_conv1 = bias_variable([para[1]])
+    h_conv1 = tf.nn.relu(conv2d(x, W_conv1) + b_conv1)
+
+  # Pooling layer - downsamples by 2X.
+  with tf.name_scope('pool_a1'):
+    h_pool1 = max_pool_2x2(h_conv1)
+
+  # Second convolutional layer -- maps para[1] feature maps to para[21].
+  with tf.name_scope('conv2'):
+    W_conv2 = weight_variable([3, 3, para[1], para[2]])
+    b_conv2 = bias_variable([para[2]])
+    h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
+
+  # Pooling layer - downsamples by 2X.
+  with tf.name_scope('pool_a2'):
+    h_pool2 = max_pool_2x2(h_conv2)
+
+  # 3rd pooling layer.
+  with tf.name_scope('conv3'):
+    W_conv3 = weight_variable([3, 3, para[2], para[3]]) # the defintion can be in the latter
+    b_conv3 = bias_variable([para[3]])
+    h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3)
+
+  # Pooling layer - downsamples by 2X.
+  with tf.name_scope('pool_a3'):
+    h_pool3 = max_pool_2x2(h_conv3)
+
+  # 4rd pooling layer.
+  with tf.name_scope('conv4'):
+    W_conv4 = weight_variable([3, 3, para[3], para[4]]) # the defintion can be in the latter
+    b_conv4 = bias_variable([para[4]])
+    h_conv4 = tf.nn.relu(conv2d(h_pool3, W_conv4) + b_conv4)
+
+  # Pooling layer - downsamples by 2X.
+  with tf.name_scope('pool_a4'):
+    h_pool4 = max_pool_2x2(h_conv4)
+
+  # 4rd pooling layer.
+  with tf.name_scope('conv5'):
+    W_conv5 = weight_variable([3, 3, para[4], para[5]]) # the defintion can be in the latter
+    b_conv5 = bias_variable([para[5]])
+    h_conv5= tf.nn.relu(conv2d(h_pool4, W_conv5) + b_conv5)
+
+  # pooling layer after conv2.
+  with tf.name_scope('GlobalAveragePool_a5'):
+    GapLayer = tf.keras.layers.GlobalAveragePooling2D(data_format='channels_last')
+    h_pool5=GapLayer(h_conv5)
+
+  with tf.name_scope('dropout'):
+    keep_prob = tf.placeholder(tf.float32)
+    h_pool5_drop = tf.nn.dropout(h_pool5, keep_prob) ## what is co-adaptation ??  dropout placeholder for what?
+
+
+  with tf.name_scope('fc6'):
+    W_fc6 = weight_variable([para[5], para[6]])
+    b_fc6 = bias_variable([para[6]])
+
+    h_fc6 = tf.matmul(h_pool5_drop,W_fc6) + b_fc6
+
+
+  return h_fc6, keep_prob
+
+
+
+def VGG5GAP_Regul(x, h=28, w=28, para={1: 32, 2: 64, 3: 128, 4: 256, 5: 512, 6:10}):
+  """VGG11 builds the graph for a VGG11 net for classifying 2D fingerprint.
+  Args:
+    para: an input parameter for the number of weights in each layers
+    para={1:8, 2:16, 3:32,4:32, 5:64,6:64, 7:128,8:128, 9:512,10:512:11:10}
+  Returns:
+    placeholder name, and output logits
+  """
+  with tf.name_scope('conv1'):
+    W_conv1 = weight_variable([3, 3, 1, para[1]]) # the defintion can be in the latter
+    b_conv1 = bias_variable([para[1]])
+    h_conv1 = tf.nn.relu(conv2d(x, W_conv1) + b_conv1)
+
+  # Pooling layer - downsamples by 2X.
+  with tf.name_scope('pool_a1'):
+    h_pool1 = max_pool_2x2(h_conv1)
+
+  # Second convolutional layer -- maps para[1] feature maps to para[21].
+  with tf.name_scope('conv2'):
+    W_conv2 = weight_variable([3, 3, para[1], para[2]])
+    b_conv2 = bias_variable([para[2]])
+    h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
+
+  # Pooling layer - downsamples by 2X.
+  with tf.name_scope('pool_a2'):
+    h_pool2 = max_pool_2x2(h_conv2)
+
+  # 3rd pooling layer.
+  with tf.name_scope('conv3'):
+    W_conv3 = weight_variable([3, 3, para[2], para[3]]) # the defintion can be in the latter
+    b_conv3 = bias_variable([para[3]])
+    h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3)
+
+  # Pooling layer - downsamples by 2X.
+  with tf.name_scope('pool_a3'):
+    h_pool3 = max_pool_2x2(h_conv3)
+
+  # 4rd pooling layer.
+  with tf.name_scope('conv4'):
+    W_conv4 = weight_variable([3, 3, para[3], para[4]]) # the defintion can be in the latter
+    b_conv4 = bias_variable([para[4]])
+    h_conv4 = tf.nn.relu(conv2d(h_pool3, W_conv4) + b_conv4)
+
+  # Pooling layer - downsamples by 2X.
+  with tf.name_scope('pool_a4'):
+    h_pool4 = max_pool_2x2(h_conv4)
+
+  # 4rd pooling layer.
+  with tf.name_scope('conv5'):
+    W_conv5 = weight_variable([3, 3, para[4], para[5]]) # the defintion can be in the latter
+    b_conv5 = bias_variable([para[5]])
+    h_conv5= tf.nn.relu(conv2d(h_pool4, W_conv5) + b_conv5)
+
+  # pooling layer after conv2.
+  with tf.name_scope('GlobalAveragePool_a5'):
+    GapLayer = tf.keras.layers.GlobalAveragePooling2D(data_format='channels_last')
+    h_pool5=GapLayer(h_conv5)
+
+
+  with tf.name_scope('fc6'):
+    W_fc6 = weight_variable([para[5], para[6]])
+    b_fc6 = bias_variable([para[6]])
+
+    h_fc6 = tf.matmul(h_pool5,W_fc6) + b_fc6
+
+    regularizer=tf.nn.l2_loss(W_fc6)
+
+
+  return h_fc6, regularizer
+
+
 
 
 def VGG11(x,h=28,w=28,para={1:8, 2:16, 3:32,4:32, 5:64,6:64, 7:128,8:128, 9:512,10:512,11:10}):
@@ -128,7 +281,7 @@ def VGG11(x,h=28,w=28,para={1:8, 2:16, 3:32,4:32, 5:64,6:64, 7:128,8:128, 9:512,
   # features.
   with tf.name_scope('dropout'):
     keep_prob = tf.placeholder(tf.float32)
-    h_fc10_drop = tf.nn.dropout(h_fc10, keep_prob) ## what is co-adaptation 相互适应？？  dropout placeholder for what?
+    h_fc10_drop = tf.nn.dropout(h_fc10, keep_prob) ## what is co-adaptation??  dropout placeholder for what?
 
 
   with tf.name_scope('fc11'):
@@ -208,7 +361,7 @@ def VGG7(x,h=28,w=28,para={1:32,2:32, 3:64,4:64, 5:512,6:512,7:10}):
   # features.
   with tf.name_scope('dropout'):
     keep_prob = tf.placeholder(tf.float32)
-    h_fc6_drop = tf.nn.dropout(h_fc6, keep_prob) ## what is co-adaptation 相互适应？？  dropout placeholder for what?
+    h_fc6_drop = tf.nn.dropout(h_fc6, keep_prob) ## what is co-adaptation ??  dropout placeholder for what?
 
 
   with tf.name_scope('fc7'):

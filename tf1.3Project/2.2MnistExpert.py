@@ -86,7 +86,7 @@ def deepnn(x):
   # features.
   with tf.name_scope('dropout'):
     keep_prob = tf.placeholder(tf.float32)
-    h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob) ## what is co-adaptation 相互适应？？  dropout placeholder for what?
+    h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob) ## what is co-adaptation  dropout placeholder for what?
 
   # Map the 1024 features to 10 classes, one for each digit
   with tf.name_scope('fc2'):

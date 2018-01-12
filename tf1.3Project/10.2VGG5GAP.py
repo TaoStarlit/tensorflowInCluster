@@ -52,8 +52,8 @@ def main(_):
   with tf.name_scope('reshape'):
     x_image = tf.reshape(x, [-1, 28, 28, 1])
   
-  print("using VGG7");
-  y_conv, keep_prob = mymodel.VGG7(x_image)
+  print("using VGG5GAP");
+  y_conv, keep_prob = mymodel.VGG5GAP(x_image)
 
   with tf.name_scope('loss'):
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=y_,
@@ -76,7 +76,7 @@ def main(_):
 
   with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    for i in range(800): #20000 1200 500
+    for i in range(1200): #20000 1200 500
       batch = mnist.train.next_batch(50)
       if i % 100 == 0:
         train_accuracy = accuracy.eval(feed_dict={
@@ -84,7 +84,7 @@ def main(_):
         print('step %d, training accuracy %g' % (i, train_accuracy))
       train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.8})
       
-      if i%200==0:
+      if i%400==0:
         print('test accuracy %g' % accuracy.eval(feed_dict={
           x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))#orginal 0.5
 
